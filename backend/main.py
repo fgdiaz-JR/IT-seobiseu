@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.routers.health import router as health_router
+from app.database.init_db import init_sqlite
+from app.routers.auth import router as auth_router
+from app.routers.resources import router as resources_router
 
 settings = get_settings()
 
@@ -22,3 +25,9 @@ if settings.origins:
     )
 
 app.include_router(health_router, prefix=settings.api_prefix)
+app.include_router(auth_router, prefix=settings.api_prefix)
+app.include_router(resources_router, prefix=settings.api_prefix)
+
+@app.on_event("startup")
+def initialize_database() -> None:
+    init_sqlite()

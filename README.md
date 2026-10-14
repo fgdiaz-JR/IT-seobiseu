@@ -184,6 +184,15 @@ JWT_SECRET_KEY=una_clave_larga_y_privada_de_al_menos_32_caracteres
 
 El archivo `.env` es privado. No lo publiques ni lo envíes por chat.
 
+En modo local SQLite, el usuario de prueba se crea automáticamente:
+
+```text
+Correo: admin@it-seobiseu.local
+Contraseña: Admin123!
+```
+
+Cambia esa contraseña antes de publicar la aplicación.
+
 ### Encender el servidor
 
 Desde la carpeta [backend/](backend/):

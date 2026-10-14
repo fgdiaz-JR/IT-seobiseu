@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     oracle_user: str = ""
     oracle_password: str = ""
     oracle_dsn: str = ""
+    database_mode: str = "sqlite"
+    sqlite_path: str = "it_seobiseu.db"
+    seed_admin_email: str = "admin@it-seobiseu.local"
+    seed_admin_password: str = "Admin123!"
     jwt_secret_key: str = Field(
         default="development-only-change-this-secret-key",
         min_length=32,
@@ -28,6 +32,10 @@ class Settings(BaseSettings):
     @property
     def origins(self) -> list[str]:
         return [origin.strip() for origin in self.frontend_origins.split(",") if origin.strip()]
+
+    @property
+    def use_sqlite(self) -> bool:
+        return self.database_mode.lower() == "sqlite"
 
 
 @lru_cache
