@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     app_name: str = "IT seobiseu API"
     app_env: str = "development"
     api_prefix: str = "/api/v1"
-    frontend_origins: str = ""
+    frontend_origins: str = "http://localhost:5500,http://127.0.0.1:5500"
     oracle_user: str = ""
     oracle_password: str = ""
     oracle_dsn: str = ""
