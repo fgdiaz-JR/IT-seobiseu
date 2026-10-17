@@ -241,6 +241,25 @@ El frontend debe apuntar a la URL pública del backend, no a
 `localhost:8000`. Nunca se deben poner la contraseña, el Wallet de Oracle o la
 clave JWT dentro de `frontend/`.
 
+### Checklist obligatorio antes de producción
+
+Antes de abrir la aplicación al público, verifica todo lo siguiente:
+
+- `APP_ENV=production`.
+- `DATABASE_MODE=oracle`.
+- `ORACLE_USER`, `ORACLE_PASSWORD` y `ORACLE_DSN` pertenecen a un usuario de aplicación, no a `ADMIN`.
+- `ORACLE_WALLET_DIR` apunta a un Wallet instalado fuera de la carpeta pública.
+- `JWT_SECRET_KEY` es una clave aleatoria larga y diferente de la de desarrollo.
+- `FRONTEND_ORIGINS` contiene únicamente la URL HTTPS real del frontend.
+- Se cambió la contraseña `Admin123!` y se creó un usuario administrador real.
+- El servidor publica FastAPI detrás de HTTPS.
+- El archivo `.env`, el Wallet y la base SQLite no están en Git.
+- Se ejecutaron los scripts Oracle y se probó `/api/v1/health` en el servidor.
+
+La API se niega a arrancar en modo producción si detecta SQLite, secretos de
+desarrollo, CORS HTTP o una configuración Oracle incompleta. Esto evita
+publicar por accidente una instalación insegura.
+
 ## 9. Seguridad explicada fácilmente
 
 Una contraseña es como la llave de una casa. Por eso:

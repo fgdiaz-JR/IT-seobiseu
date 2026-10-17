@@ -45,3 +45,15 @@ def get_current_user(
     if row is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no disponible.")
     return dict(row)
+
+
+def require_roles(*allowed_roles: str):
+    def dependency(user=Depends(get_current_user)) -> dict:
+        if user["rol"] not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos para realizar esta operación.",
+            )
+        return user
+
+    return dependency

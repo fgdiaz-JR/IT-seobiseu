@@ -16,6 +16,7 @@ if not settings.use_sqlite and all(
         user=settings.oracle_user,
         password=settings.oracle_password,
         dsn=settings.oracle_dsn,
+        config_dir=settings.oracle_wallet_dir or None,
         min=1,
         max=5,
         increment=1,

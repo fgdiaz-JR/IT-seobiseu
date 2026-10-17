@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_roles
 from app.database.connection import get_connection
 from app.schemas.common import (
     ClientCreate, ClientResponse, InventoryCreate, InventoryResponse,
@@ -22,7 +22,11 @@ def list_clients(search: str | None = None, connection=Depends(get_connection), 
 
 
 @router.post("/clientes", response_model=ClientResponse, status_code=status.HTTP_201_CREATED)
-def create_client(payload: ClientCreate, connection=Depends(get_connection), _=Depends(get_current_user)):
+def create_client(
+    payload: ClientCreate,
+    connection=Depends(get_connection),
+    _=Depends(require_roles("ADMINISTRADOR", "SUPERVISOR")),
+):
     try:
         cursor = connection.execute(
             "INSERT INTO clientes (razon_social, identificacion_fiscal, correo_contacto, telefono, estado) "
@@ -64,12 +68,19 @@ def create_ticket(payload: TicketCreate, connection=Depends(get_connection), use
 
 
 @router.get("/inventario", response_model=list[InventoryResponse])
-def list_inventory(connection=Depends(get_connection), _=Depends(get_current_user)):
+def list_inventory(
+    connection=Depends(get_connection),
+    _=Depends(require_roles("ADMINISTRADOR", "SUPERVISOR", "TECNICO")),
+):
     return [dict(row) for row in connection.execute("SELECT * FROM inventario WHERE activo = 1 ORDER BY nombre").fetchall()]
 
 
 @router.post("/inventario", response_model=InventoryResponse, status_code=status.HTTP_201_CREATED)
-def create_inventory(payload: InventoryCreate, connection=Depends(get_connection), _=Depends(get_current_user)):
+def create_inventory(
+    payload: InventoryCreate,
+    connection=Depends(get_connection),
+    _=Depends(require_roles("ADMINISTRADOR", "SUPERVISOR")),
+):
     cursor = connection.execute(
         "INSERT INTO inventario (sku, nombre, categoria, stock, stock_minimo, precio_unitario, ubicacion) "
         "VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -80,12 +91,19 @@ def create_inventory(payload: InventoryCreate, connection=Depends(get_connection
 
 
 @router.get("/ordenes", response_model=list[OrderResponse])
-def list_orders(connection=Depends(get_connection), _=Depends(get_current_user)):
+def list_orders(
+    connection=Depends(get_connection),
+    _=Depends(require_roles("ADMINISTRADOR", "SUPERVISOR", "TECNICO")),
+):
     return [dict(row) for row in connection.execute("SELECT * FROM ordenes_trabajo ORDER BY id DESC").fetchall()]
 
 
 @router.post("/ordenes", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
-def create_order(payload: OrderCreate, connection=Depends(get_connection), _=Depends(get_current_user)):
+def create_order(
+    payload: OrderCreate,
+    connection=Depends(get_connection),
+    _=Depends(require_roles("ADMINISTRADOR", "SUPERVISOR", "TECNICO")),
+):
     cursor = connection.execute(
         "INSERT INTO ordenes_trabajo (cliente_id, ticket_id, equipo, prioridad, diagnostico) VALUES (?, ?, ?, ?, ?)",
         (payload.cliente_id, payload.ticket_id, payload.equipo, payload.prioridad, payload.diagnostico),
@@ -95,7 +113,10 @@ def create_order(payload: OrderCreate, connection=Depends(get_connection), _=Dep
 
 
 @router.get("/telemetria/resumen")
-def dashboard(connection=Depends(get_connection), _=Depends(get_current_user)):
+def dashboard(
+    connection=Depends(get_connection),
+    _=Depends(require_roles("ADMINISTRADOR", "SUPERVISOR")),
+):
     queries = {
         "tickets_abiertos": "SELECT COUNT(*) FROM tickets WHERE estado NOT IN ('CERRADO', 'RESUELTO')",
         "ordenes_activas": "SELECT COUNT(*) FROM ordenes_trabajo WHERE estado NOT IN ('COMPLETADA', 'CANCELADA')",
